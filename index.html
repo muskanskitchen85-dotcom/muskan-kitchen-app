@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muskan's Kitchen - Cloud Kitchen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cream': '#FFFDD0',
+                        'salmon': '#E8B4B8',
+                        'apricot': '#FFBF7F',
+                        'espresso': '#3E2723'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-cream text-espresso font-sans">
+    <!-- Navigation Bar -->
+    <nav class="sticky top-0 z-40 bg-white shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-utensils text-apricot text-2xl"></i>
+                <h1 class="text-2xl font-bold text-espresso">Muskan's Kitchen</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="adminToggle" class="hidden md:block px-4 py-2 bg-salmon rounded-lg text-white text-sm hover:bg-opacity-80 transition">
+                    Admin Panel
+                </button>
+                <button id="cartToggle" class="relative px-4 py-2 bg-apricot rounded-lg text-white font-semibold hover:bg-opacity-80 transition flex items-center gap-2">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cartCount" class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Admin Toggle -->
+        <div class="md:hidden px-4 pb-2">
+            <button id="adminToggleMobile" class="w-full px-4 py-2 bg-salmon rounded-lg text-white text-sm hover:bg-opacity-80 transition">
+                Admin Panel
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-r from-salmon to-apricot py-16 px-4 text-center text-white">
+        <div class="max-w-4xl mx-auto">
+            <div class="mb-8">
+                <i class="fas fa-image text-6xl opacity-50"></i>
+            </div>
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">Welcome to Muskan's Kitchen</h2>
+            <p class="text-lg md:text-xl mb-8 opacity-90">Delicious, fresh, and authentic cloud kitchen delights delivered to your doorstep</p>
+            <button id="viewMenuBtn" class="px-8 py-3 bg-white text-apricot font-bold rounded-lg hover:bg-cream transition text-lg">
+                View Menu
+            </button>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-12">
+        <!-- Search & Filter Section -->
+        <div class="mb-8 space-y-4">
+            <div class="flex flex-col md:flex-row gap-4">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search dishes..." 
+                    class="flex-1 px-4 py-3 border-2 border-salmon rounded-lg focus:outline-none focus:border-apricot bg-white"
+                />
+                <label class="flex items-center space-x-2 cursor-pointer px-4 py-3 bg-white border-2 border-salmon rounded-lg hover:bg-cream transition">
+                    <input type="checkbox" id="showUnavailable" class="w-4 h-4">
+                    <span class="text-sm font-medium">Show Unavailable</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Today's Specials Section -->
+        <div id="specialsSection" class="mb-12 hidden">
+            <h3 class="text-2xl font-bold text-espresso mb-6 flex items-center gap-2">
+                <i class="fas fa-star text-apricot"></i> Today's Specials
+            </h3>
+            <div id="specialsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"></div>
+        </div>
+
+        <!-- Menu Grid -->
+        <h3 class="text-2xl font-bold text-espresso mb-6">Our Menu</h3>
+        <div id="menuContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <div id="noResults" class="text-center text-gray-500 py-12 hidden">
+            <p class="text-lg">No dishes found. Try adjusting your search or filters.</p>
+        </div>
+    </main>
+
+    <!-- Closed Message -->
+    <div id="closedOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 text-center max-w-sm mx-auto">
+            <i class="fas fa-door-closed text-apricot text-5xl mb-4"></i>
+            <h2 class="text-2xl font-bold text-espresso mb-2">We're Closed Today</h2>
+            <p class="text-gray-600 mb-4">Thank you for your interest! We'll be open tomorrow.</p>
+            <button id="closedOk" class="px-6 py-2 bg-apricot text-white rounded-lg font-semibold hover:bg-opacity-80 transition">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div id="cartDrawer" class="fixed right-0 top-0 h-full w-full md:w-96 bg-white shadow-lg transform translate-x-full transition-transform duration-300 z-30 flex flex-col">
+        <!-- Cart Header -->
+        <div class="bg-apricot text-white p-4 flex justify-between items-center">
+            <h2 class="text-xl font-bold">Your Order</h2>
+            <button id="closeCart" class="text-2xl hover:text-cream transition">&times;</button>
+        </div>
+
+        <!-- Cart Items -->
+        <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
+
+        <!-- Cart Empty Message -->
+        <div id="emptyCart" class="flex-1 flex items-center justify-center text-center text-gray-500">
+            <p>Your cart is empty</p>
+        </div>
+
+        <!-- Cart Footer -->
+        <div class="border-t-2 border-salmon p-4 space-y-4">
+            <div class="flex justify-between text-lg font-bold text-espresso">
+                <span>Total:</span>
+                <span id="cartTotal">₹0</span>
+            </div>
+            <button id="checkoutBtn" class="w-full px-4 py-3 bg-apricot text-white font-bold rounded-lg hover:bg-opacity-80 transition text-lg">
+                Place Order
+            </button>
+        </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div id="cartOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden" id="cartOverlay"></div>
+
+    <!-- Order Modal -->
+    <div id="orderModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 space-y-4">
+            <h2 class="text-2xl font-bold text-espresso mb-4">Complete Your Order</h2>
+            <input 
+                type="text" 
+                id="customerName" 
+                placeholder="Your Name" 
+                class="w-full px-4 py-2 border-2 border-salmon rounded-lg focus:outline-none focus:border-apricot"
+            />
+            <textarea 
+                id="customerAddress" 
+                placeholder="Delivery Address" 
+                rows="3" 
+                class="w-full px-4 py-2 border-2 border-salmon rounded-lg focus:outline-none focus:border-apricot"
+            ></textarea>
+            <textarea 
+                id="customerNotes" 
+                placeholder="Special Instructions (Optional)" 
+                rows="2" 
+                class="w-full px-4 py-2 border-2 border-salmon rounded-lg focus:outline-none focus:border-apricot"
+            ></textarea>
+            <div class="flex gap-4 pt-4">
+                <button id="cancelOrder" class="flex-1 px-4 py-2 bg-gray-300 text-espresso rounded-lg font-semibold hover:bg-gray-400 transition">
+                    Cancel
+                </button>
+                <button id="submitOrder" class="flex-1 px-4 py-2 bg-apricot text-white rounded-lg font-semibold hover:bg-opacity-80 transition">
+                    Send via WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden overflow-y-auto">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 my-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-espresso">Admin Panel</h2>
+                <button id="closeAdmin" class="text-2xl text-gray-500 hover:text-espresso transition">&times;</button>
+            </div>
+
+            <!-- Operating Hours -->
+            <div class="mb-6 p-4 bg-cream rounded-lg">
+                <h3 class="text-lg font-bold text-espresso mb-4">Operating Hours</h3>
+                <input 
+                    type="time" 
+                    id="openingTime" 
+                    class="px-4 py-2 border-2 border-salmon rounded-lg focus:outline-none focus:border-apricot mr-4"
+                />
+                <span class="text-espresso font-semibold mr-4">to</span>
+                <input 
+                    type="time" 
+                    id="closingTime" 
+                    class="px-4 py-2 border-2 border-salmon rounded-lg focus:outline-none focus:border-apricot"
+                />
+            </div>
+
+            <!-- Closed Today Toggle -->
+            <div class="mb-6 p-4 bg-red-100 rounded-lg">
+                <label class="flex items-center space-x-4 cursor-pointer">
+                    <input type="checkbox" id="closedToday" class="w-6 h-6">
+                    <span class="text-lg font-bold text-espresso">Closed Today</span>
+                </label>
+            </div>
+
+            <!-- Dish Management -->
+            <div class="mb-6">
+                <h3 class="text-lg font-bold text-espresso mb-4">Manage Dishes</h3>
+                <div id="dishManagement" class="space-y-4 max-h-96 overflow-y-auto"></div>
+            </div>
+
+            <!-- Save Button -->
+            <button id="saveAdmin" class="w-full px-4 py-3 bg-apricot text-white font-bold rounded-lg hover:bg-opacity-80 transition">
+                Save Changes
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-espresso text-white py-12 px-4 mt-16">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- About -->
+            <div>
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-utensils text-apricot"></i> Muskan's Kitchen
+                </h3>
+                <p class="text-gray-300">Authentic, delicious, and freshly prepared meals delivered to your doorstep.</p>
+            </div>
+
+            <!-- Contact -->
+            <div>
+                <h3 class="text-lg font-bold mb-4">Contact Us</h3>
+                <div class="space-y-2 text-gray-300">
+                    <p class="flex items-center gap-2">
+                        <i class="fas fa-phone text-apricot"></i>
+                        <a href="tel:+919586600874" class="hover:text-apricot transition">+91 9586600874</a>
+                    </p>
+                    <p class="flex items-center gap-2">
+                        <i class="fas fa-envelope text-apricot"></i>
+                        <span>order@muskanskitchen.com</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Social & WhatsApp -->
+            <div>
+                <h3 class="text-lg font-bold mb-4">Follow Us</h3>
+                <div class="flex gap-4 mb-4">
+                    <a href="https://instagram.com" target="_blank" class="text-apricot hover:text-white transition text-2xl">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://wa.me/919586600874" target="_blank" class="text-apricot hover:text-white transition text-2xl">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                </div>
+                <a href="https://wa.me/919586600874" target="_blank" class="inline-block px-4 py-2 bg-apricot text-white rounded-lg font-semibold hover:bg-opacity-80 transition">
+                    <i class="fab fa-whatsapp mr-2"></i>Chat on WhatsApp
+                </a>
+            </div>
+        </div>
+        <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
+            <p>&copy; 2024 Muskan's Kitchen. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
