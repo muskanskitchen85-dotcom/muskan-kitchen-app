@@ -320,6 +320,14 @@ function closeOrderModal() {
     document.getElementById('orderModal').classList.add('hidden');
 }
 
+// Scroll to menu section
+function scrollToMenu() {
+    const menuSection = document.querySelector('main');
+    if (menuSection) {
+        menuSection.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
 // ============================================
 // EVENT LISTENERS
 // ============================================
@@ -333,7 +341,8 @@ document.getElementById('cartToggle').addEventListener('click', openCart);
 document.getElementById('closeCart').addEventListener('click', closeCart);
 document.getElementById('cartOverlay').addEventListener('click', closeCart);
 
-document.getElementById('viewMenuBtn').addEventListener('click', openCart);
+// Fixed: View Menu button now scrolls to menu instead of opening cart
+document.getElementById('viewMenuBtn').addEventListener('click', scrollToMenu);
 
 // Search and Filter
 document.getElementById('searchInput').addEventListener('input', (e) => {
